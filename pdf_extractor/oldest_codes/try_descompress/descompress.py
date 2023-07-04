@@ -1,6 +1,7 @@
 import PyPDF2
 import zlib
 
+
 def descompress_file(file_path):
     with open(file_path, 'rb') as file:
         reader = PyPDF2.PdfReader(file)
@@ -18,6 +19,7 @@ def descompress_file(file_path):
                         print(decompressed_content)
                     else:
                         print(indirect_obj)
+
 
 pdf_path = 'altere o path para o pdf'
 

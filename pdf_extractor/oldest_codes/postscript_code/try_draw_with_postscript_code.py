@@ -23,7 +23,6 @@ for obj in content:
     data = data.decode('utf-8')
     lines = data.split('\n')
 
-
     for line in lines:
         print(line)
         if line.strip():
@@ -32,15 +31,15 @@ for obj in content:
                 x, y = map(float, values)
                 c.translate(x, y)
 
-            elif command == 'l': # instrução line
+            elif command == 'l':  # instrução line
                 x, y = map(float, values)
                 c.line(0, 0, x, y)
 
-            elif command == 'S': # instrução stroke
+            elif command == 'S':  # instrução stroke
                 path = c.beginPath()
                 c.drawPath(path, stroke=1, fill=0, fillMode=None)
 
-            elif command == 'Q':   # Finaliza o código
+            elif command == 'Q':  # Finaliza o código
                 path = c.beginPath()
                 c.clipPath(path, stroke=1, fill=0, fillMode=None)
 
@@ -48,4 +47,3 @@ for obj in content:
                 pass
 
     c.save()
-
