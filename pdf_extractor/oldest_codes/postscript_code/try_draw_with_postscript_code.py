@@ -1,19 +1,21 @@
 from PyPDF2 import PdfReader
-from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-import io
+from reportlab.lib.colors import Color
+from reportlab.lib.pagesizes import inch
 
-output_path = 'resultado.pdf'
-c = canvas.Canvas(output_path, pagesize=letter)
+custom_width = 130.59722222222223  # em polegadas
+custom_height = 13.01388888888889  # em polegadas
 
-pdf_path = '../1-BRSA-313D-AL_perfil_composto.pdf'
-temp_pdf_file = io.BytesIO()
-c = canvas.Canvas(temp_pdf_file)
+custom_pagesize = (custom_width * inch, custom_height * inch)
+
+pdf_lines_draw = 'pdf_lines_draw.pdf'
+pdf_with_rect_draw = 'pdf_with_rect_draw.pdf'
+c = canvas.Canvas(pdf_lines_draw, pagesize=custom_pagesize)
+complete_canvas = canvas.Canvas(pdf_with_rect_draw, pagesize=custom_pagesize)
+
+pdf_path = '../../pdfs/meupdf.pdf'
 reader = PdfReader(pdf_path)
-
-page_num = 0
-
-page = reader.pages[page_num]
+page = reader.pages[0]
 
 content = page['/Contents']
 
@@ -23,27 +25,56 @@ for obj in content:
     data = data.decode('utf-8')
     lines = data.split('\n')
 
-    for line in lines:
-        print(line)
-        if line.strip():
-            command, *values = line.strip().split()
-            if command == 'm':  # instrução move
-                x, y = map(float, values)
-                c.translate(x, y)
+    for i in range(len(lines)):
+        try:
+            if 'm' in lines[i]:
+                x, y, *_ = lines[i].split(" ")
+                x1 = float(x)
+                y1 = float(y)
 
-            elif command == 'l':  # instrução line
-                x, y = map(float, values)
-                c.line(0, 0, x, y)
+                if i + 1 < len(lines):
+                    next_line = lines[i + 1]
+                    xf, yf, *_ = next_line.split(" ")
+                    x2 = float(x)
+                    y2 = float(y)
 
-            elif command == 'S':  # instrução stroke
-                path = c.beginPath()
-                c.drawPath(path, stroke=1, fill=0, fillMode=None)
+                    c.line(x1, y1, x2, y2)
+                    complete_canvas.line(x1, y1, x2, y2)
 
-            elif command == 'Q':  # Finaliza o código
-                path = c.beginPath()
-                c.clipPath(path, stroke=1, fill=0, fillMode=None)
 
-            else:
-                pass
+        except Exception as e:
+            print("Deu erro na linha", lines[i])
+            print("Deu erro na linha", lines[i+1].split(" "))
+            print(str(e))
 
-    c.save()
+
+for obj in content:
+    indirect_obj = reader.get_object(obj)
+    data = indirect_obj.get_data()
+    data = data.decode('utf-8')
+    lines = data.split('\n')
+
+    start = 0
+    for i in range(len(lines)):
+        try:
+            if 'rg' in lines[i]:
+                r,g,b, *_ = lines[i].split(" ")
+                color = Color(float(r), float(g), float(b))
+                complete_canvas.setFillColor(color)
+
+            if 're' in lines[i]:
+                x_coord, y_coord, width, height, *_ = lines[i].split(" ")
+                x_coord = float(x_coord)
+                y_coord = float(y_coord)
+                width = float(width)
+                height = float(height)
+
+                complete_canvas.rect(x_coord, y_coord, width, height, fill=True, stroke=False)
+
+        except Exception as e:
+            print("Deu erro na linha", lines[i])
+            print("Deu erro na linha", lines[i+1].split(" "))
+            print(str(e))
+
+c.save()
+complete_canvas.save()

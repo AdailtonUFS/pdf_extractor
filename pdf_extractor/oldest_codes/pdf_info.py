@@ -1,6 +1,6 @@
 import PyPDF2
 
-pdf_file = '=output.pdf'
+pdf_file = '../pdfs/meupdf.pdf'
 
 with open(pdf_file, 'rb') as file:
     pdf_reader = PyPDF2.PdfReader(file)
