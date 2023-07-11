@@ -28,7 +28,6 @@ class Draw:
 
             self.custom_pagesize = (page.mediabox.width, page.mediabox.height)
 
-            print(self.x_coordinate_min, self.x_coordinate_max, self.y_coordinate_min, self.y_coordinate_max)
         except FileNotFoundError:
             print("Arquivo não encontrado! Por favor revise o arquivo e tente novamente")
         except Exception as e:
@@ -37,7 +36,15 @@ class Draw:
     def canvas(self, pdf_path: str):
         return canvas.Canvas(filename=pdf_path, pagesize=self.custom_pagesize)
 
+    @staticmethod
+    def validate_path(pdf_path: str):
+        if '.pdf' not in pdf_path:
+            pdf_path += '.pdf'
+
+        return pdf_path
+
     def complete_pdf(self, pdf_path):
+        pdf_path = self.validate_path(pdf_path)
         complete_pdf_canvas = self.canvas(pdf_path)
         parser = PostscriptInstructions(complete_pdf_canvas)
 
@@ -53,8 +60,6 @@ class Draw:
                         r, g, b, *_ = postscript_code_lines[i].split(" ")
                         color = Color(float(r), float(g), float(b))
                         complete_pdf_canvas.setFillColor(color)
-
-
 
                     if 'm' in postscript_code_lines[i]:
                         x, y, *_ = postscript_code_lines[i].split(" ")
@@ -89,6 +94,7 @@ class Draw:
         complete_pdf_canvas.save()
 
     def line_pdf(self, pdf_path):
+        pdf_path = self.validate_path(pdf_path)
         line_pdf = self.canvas(pdf_path)
         parser = PostscriptInstructions(line_pdf)
 
@@ -119,7 +125,6 @@ class Draw:
                             if (self.x_coordinate_min < x1 < self.x_coordinate_max) and (
                                     self.y_coordinate_min < y1 < self.y_coordinate_max):
                                 line_pdf.line(x1, y1, x2, y2)
-
 
                 except Exception as e:
                     print("Deu erro na linha", postscript_code_lines[i])
