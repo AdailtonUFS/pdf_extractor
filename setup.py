@@ -1,8 +1,10 @@
 from pdf_extractor.entities.Draw import Draw
 from pdf_extractor.entities.Ghostscript import Ghostscript
+from utils.open_pdf_viewer import open_pdf
 
 pdf_file_path = input("PDF FILE PATH (INPUT) \n")
-option = input("Escolha a opção: \n 1- Gerar PDF com as linhas \n 2- Gerar PDF com os retângulos \n 3- Gerar postscript de um pdf\n 0- Sair \n")
+option = input("Escolha a opção: \n 1- Gerar PDF com as linhas \n 2- Gerar PDF com os retângulos \n 3- Gerar "
+               "postscript de um pdf\n 0- Sair \n")
 option = int(option)
 
 while option != 0:
@@ -17,6 +19,8 @@ while option != 0:
             "\n ymax: \"Posição onde o arquivo terminará a ser escrito no eixo y"
             "\n Exemplo: 1230,8900,120,480 (desenha os dados das rochas e a forma da perfuração)"
             "\n Exemplo: 1230,8893,295,359 (desenha os dados das rochas e a profundidade)"
+            "\n Exemplo: 1380,1385,280,310 (profundidade 50)"
+            "\n Exemplo: 1246,8877,0,2200  (teste distancia total)"
             "\n Caso não: Apenas deixe em branco\n"
         )
 
@@ -33,13 +37,17 @@ while option != 0:
 
         if option == 1:
             draw.line_pdf(path)
+            open_pdf(path)
         if option == 2:
             draw.complete_pdf(path)
+            open_pdf(path)
 
     if option == 3:
         print(pdf_file_path, path)
         ghostscript = Ghostscript()
         ghostscript.pdf_to_ps(pdf_file_path, path)
 
-    option = input("Escolha a opção: \n 1- Gerar PDF com as linhas \n 2- Gerar PDF com os retângulos \n 3- Gerar postscript de um pdf\n 0- Sair \n")
+    option = input(
+        "Escolha a opção: \n 1- Gerar PDF com as linhas \n 2- Gerar PDF com os retângulos \n 3- Gerar postscript de "
+        "um pdf\n 0- Sair \n")
     option = int(option)
