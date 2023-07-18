@@ -1,6 +1,6 @@
 from PyPDF2 import PdfReader
-from reportlab.lib.colors import Color
 from reportlab.pdfgen import canvas
+from tqdm import tqdm
 
 from pdf_extractor.entities.PostscriptInstructions import PostscriptInstructions
 
@@ -43,10 +43,13 @@ class Draw:
 
         return pdf_path
 
-    def complete_pdf(self, pdf_path):
+    def process_pdf(self, pdf_path, instruction_func):
         pdf_path = self.validate_path(pdf_path)
-        complete_pdf_canvas = self.canvas(pdf_path)
-        parser = PostscriptInstructions(complete_pdf_canvas)
+        pdf_canvas = self.canvas(pdf_path)
+        parser = PostscriptInstructions(pdf_canvas, self.x_coordinate_min, self.x_coordinate_max, self.y_coordinate_min, self.y_coordinate_max)
+
+        num_lines = self.count_lines()
+        progress_bar = tqdm(total=num_lines, desc='Progresso')
 
         for pdf_object in self.content:
             indirect_pdf_object = self.reader.get_object(pdf_object)
@@ -54,49 +57,29 @@ class Draw:
             postscript_code = data.decode('utf-8')
             postscript_code_lines = postscript_code.split('\n')
 
-            for i in range(len(postscript_code_lines)):
-                try:
-                    if 'rg' in postscript_code_lines[i]:
-                        r, g, b, *_ = postscript_code_lines[i].split(" ")
-                        color = Color(float(r), float(g), float(b))
-                        complete_pdf_canvas.setFillColor(color)
+            for postscript_code_line in postscript_code_lines:
+                instruction_func(parser, postscript_code_line)
+                progress_bar.update(1)
 
-                    if 'm' in postscript_code_lines[i]:
-                        x, y, *_ = postscript_code_lines[i].split(" ")
-                        x1 = float(x)
-                        y1 = float(y)
+        progress_bar.close()
 
-                        if i + 1 < len(postscript_code_lines):
-                            next_line = postscript_code_lines[i + 1]
-                            xf, yf, *_ = next_line.split(" ")
-                            x2 = float(x)
-                            y2 = float(y)
-                            if (self.x_coordinate_min < x1 < self.x_coordinate_max) and (
-                                    self.y_coordinate_min < y1 < self.y_coordinate_max):
-                                complete_pdf_canvas.line(x1, y1, x2, y2)
+        pdf_canvas.save()
 
-                    if 're' in postscript_code_lines[i]:
-                        x_coord, y_coord, width, height, *_ = postscript_code_lines[i].split(" ")
-                        x_coord = float(x_coord)
-                        y_coord = float(y_coord)
-                        width = float(width)
-                        height = float(height)
-                        if (self.x_coordinate_min < x_coord < self.x_coordinate_max) and (
-                                self.y_coordinate_min < y_coord < self.y_coordinate_max):
-                            complete_pdf_canvas.rect(x_coord, y_coord, width, height, fill=True, stroke=False)
+    def complete_pdf(self, pdf_path):
+        def process_instruction(parser, postscript_code_line):
+            parser.parser_line(postscript_code_line)
 
-
-                except Exception as e:
-                    print("Deu erro na linha", postscript_code_lines[i])
-                    print("Deu erro na linha", postscript_code_lines[i + 1].split(" "))
-                    print(str(e))
-
-        complete_pdf_canvas.save()
+        self.process_pdf(pdf_path, process_instruction)
 
     def line_pdf(self, pdf_path):
-        pdf_path = self.validate_path(pdf_path)
-        line_pdf = self.canvas(pdf_path)
-        parser = PostscriptInstructions(line_pdf)
+        def process_instruction(parser, postscript_code_line):
+            if 're' not in postscript_code_line:
+                parser.parser_line(postscript_code_line)
+
+        self.process_pdf(pdf_path, process_instruction)
+
+    def count_lines(self):
+        num_lines = 0
 
         for pdf_object in self.content:
             indirect_pdf_object = self.reader.get_object(pdf_object)
@@ -104,30 +87,6 @@ class Draw:
             postscript_code = data.decode('utf-8')
             postscript_code_lines = postscript_code.split('\n')
 
-            for i in range(len(postscript_code_lines)):
-                try:
-                    if 'rg' in postscript_code_lines[i]:
-                        r, g, b, *_ = postscript_code_lines[i].split(" ")
-                        color = Color(float(r), float(g), float(b))
-                        line_pdf.setFillColor(color)
+            num_lines += len(postscript_code_lines)
 
-                    if 'm' in postscript_code_lines[i]:
-                        x, y, *_ = postscript_code_lines[i].split(" ")
-                        x1 = float(x)
-                        y1 = float(y)
-
-                        if i + 1 < len(postscript_code_lines):
-                            next_line = postscript_code_lines[i + 1]
-                            xf, yf, *_ = next_line.split(" ")
-                            x2 = float(x)
-                            y2 = float(y)
-
-                            if (self.x_coordinate_min < x1 < self.x_coordinate_max) and (
-                                    self.y_coordinate_min < y1 < self.y_coordinate_max):
-                                line_pdf.line(x1, y1, x2, y2)
-
-                except Exception as e:
-                    print("Deu erro na linha", postscript_code_lines[i])
-                    print("Deu erro na linha", postscript_code_lines[i + 1].split(" "))
-                    print(str(e))
-        line_pdf.save()
+        return num_lines
