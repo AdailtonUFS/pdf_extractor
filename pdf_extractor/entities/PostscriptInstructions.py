@@ -1,5 +1,6 @@
 from reportlab.lib.colors import Color
 
+
 class PostscriptInstructions:
     def __init__(self, canvas, x_coordinate_min, x_coordinate_max, y_coordinate_min, y_coordinate_max):
         self.canvas = canvas
@@ -21,7 +22,10 @@ class PostscriptInstructions:
             self._handle_rectangle(postscript_line_code)
 
     def _handle_color(self, line):
+        file = open("colors.txt", "a")
         r, g, b, *_ = line.split(" ")
+        color = r + ", " + g + ", " + b + '\n'
+        file.write(color)
         color = Color(float(r), float(g), float(b))
         self.canvas.setFillColor(color)
 
