@@ -38,16 +38,17 @@ class PostscriptInstructions:
                 self._handle_define_pattern(postscript_line_code)
             case 'cm':
                 self._handle_scale(postscript_line_code)
-            case 'f*':  # Handle 'f*'
-                self._handle_eofill()
-            case 'S':  # Handle 'f*'
-                pass
-            case 'h':  # Handle 'f*'
-                pass
-            case 'q':  # Handle 'f*'
-                pass
+            # case 'f*':  # Handle 'f*'
+            #     self._handle_eofill()
+            # case 'S':  # Handle 'f*'
+            #     pass
+            # case 'h':  # Handle 'f*'
+            #     pass
+            # case 'q':  # Handle 'f*'
+            #     pass
             case _:
-                print(postscript_line_code)
+                pass
+                # print(postscript_line_code)
 
     def _handle_fill_color(self, line):
         r, g, b, *_ = line.split(" ")
