@@ -40,11 +40,11 @@ class PostscriptInstructions:
                 self._handle_scale(postscript_line_code)
             # case 'f*':  # Handle 'f*'
             #     self._handle_eofill()
-            # case 'S':  # Handle 'f*'
+            # case 'S':  # Handle 'S'
             #     pass
-            # case 'h':  # Handle 'f*'
+            # case 'h':  # Handle 'h'
             #     pass
-            # case 'q':  # Handle 'f*'
+            # case 'q':  # Handle 'q'
             #     pass
             case _:
                 pass
