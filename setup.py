@@ -1,53 +1,34 @@
+import os
+
 from pdf_extractor.entities.Draw import Draw
-from pdf_extractor.entities.Ghostscript import Ghostscript
-from utils.open_pdf_viewer import open_pdf
+from pdf_extractor.entities.Image import Image
+from utils.uniquify_file import uniquify
 
-pdf_file_path = input("PDF FILE PATH (INPUT) \n")
-option = input("Escolha a opção: \n 1- Gerar PDF com as linhas \n 2- Gerar PDF com os retângulos \n 3- Gerar "
-               "postscript de um pdf\n 0- Sair \n")
-option = int(option)
+def define_pdf_path():
+    pdf_file_path = input("PDF FILE PATH (INPUT) \n")
 
-while option != 0:
-    path = input("Informe o caminho onde o arquivo será salvo:\n")
-    if option == 1 or option == 2:
-        coordinates = input(
-            "Deseja limitar a area do pdf?"
-            "\n Caso sim: digite as coordenadas separadas por \",\""
-            "\n xmin: \"Posição onde o arquivo começará a ser escrito no eixo x"
-            "\n xmin: \"Posição onde o arquivo terminará a ser escrito no eixo x"
-            "\n ymin: \"Posição onde o arquivo começará a ser escrito no eixo y"
-            "\n ymax: \"Posição onde o arquivo terminará a ser escrito no eixo y"
-            "\n Exemplo: 1230,8900,120,480 (desenha os dados das rochas e a forma da perfuração)"
-            "\n Exemplo: 1230,8893,295,359 (desenha os dados das rochas e a profundidade)"
-            "\n Exemplo: 1380,1385,280,310 (profundidade 50)"
-            "\n Exemplo: 1246,8877,0,2200  (teste distancia total)"
-            "\n Caso não: Apenas deixe em branco\n"
-        )
+    path_array = pdf_file_path.split('/')
 
-        if len(coordinates.split(',')) == 4:
-            x_min, x_max, y_min, y_max = coordinates.split(',')
-            x_min = float(x_min)
-            x_max = float(x_max)
-            y_min = float(y_min)
-            y_max = float(y_max)
+    filename = path_array[len(path_array) - 1]
+    folder_name = filename.replace('.pdf', '')
 
-            draw = Draw(pdf_file_path, x_min, x_max, y_min, y_max)
-        else:
-            draw = Draw(pdf_file_path)
+    path_folder = '/home/skywalker/projects/python/pdfquery/pdf_extractor/pdfs/generated/' + folder_name
 
-        if option == 1:
-            draw.line_pdf(path)
-            open_pdf(path)
-        if option == 2:
-            draw.complete_pdf(path)
-            open_pdf(path)
+    if not os.path.exists(path_folder):
+        os.mkdir(path_folder)
 
-    if option == 3:
-        print(pdf_file_path, path)
-        ghostscript = Ghostscript()
-        ghostscript.pdf_to_ps(pdf_file_path, path)
 
-    option = input(
-        "Escolha a opção: \n 1- Gerar PDF com as linhas \n 2- Gerar PDF com os retângulos \n 3- Gerar postscript de "
-        "um pdf\n 0- Sair \n")
-    option = int(option)
+    path_save = uniquify(path_folder + "/" + filename)
+    return [pdf_file_path, path_save]
+
+
+pdf_file_path, path_save = define_pdf_path()
+
+
+image = Image(pdf_file_path)
+position = image.search_word("litologias:")
+draw = Draw(pdf_file_path, y_coordinate_min=position['y'])
+draw.complete_pdf(path_save)
+
+
+# /home/skywalker/projects/python/pdfquery/pdf_extractor/pdfs/3CP1853SE_PC.pdf

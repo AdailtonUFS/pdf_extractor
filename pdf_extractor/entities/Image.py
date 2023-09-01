@@ -23,7 +23,7 @@ class Image:
         y_converted_coordinate = float(self.page.mediabox.height) - (word_position['y'] * pixel_to_point_height_ratio)
         return {'x': x_converted_coordinate, 'y': y_converted_coordinate}
 
-    def search_word_in_words_collection(self, word: str):
+    def search_word(self, word: str):
         words_collection = self._all_words()
 
         word_position = {}
