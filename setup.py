@@ -27,8 +27,7 @@ pdf_file_path, path_save = define_pdf_path()
 
 image = Image(pdf_file_path)
 position = image.search_word("litologias:")
-draw = Draw(pdf_file_path, y_coordinate_min=position['y'])
+draw = Draw(pdf_file_path, y_coordinate_min=position['y'], x_coordinate_min=position['x'])
 draw.complete_pdf(path_save)
 
 
-# /home/skywalker/projects/python/pdfquery/pdf_extractor/pdfs/3CP1853SE_PC.pdf

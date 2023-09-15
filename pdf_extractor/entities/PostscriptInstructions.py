@@ -10,10 +10,10 @@ class PostscriptInstructions:
         self.current_y = 0
         self.x_scale = 1
         self.y_scale = 1
-        self.x_coordinate_min = x_coordinate_min
-        self.x_coordinate_max = x_coordinate_max
-        self.y_coordinate_min = y_coordinate_min
-        self.y_coordinate_max = y_coordinate_max
+        self.x_coordinate_min = float(x_coordinate_min)
+        self.x_coordinate_max = float(x_coordinate_max)
+        self.y_coordinate_min = float(y_coordinate_min)
+        self.y_coordinate_max = float(y_coordinate_max)
 
     def parser_line(self, postscript_line_code):
         instruction = postscript_line_code.split(" ")
@@ -62,14 +62,14 @@ class PostscriptInstructions:
 
     def _handle_moveto(self, line):
         x, y, *_ = line.split(" ")
-        if not (self.x_coordinate_min < x < self.x_coordinate_max):
+        x = float(x)
+        y = float(y)
+        if not (self.x_coordinate_min < x < self.x_coordinate_max) and not (
+                self.y_coordinate_min < y < self.y_coordinate_max):
             return
 
-        if not (self.y_coordinate_min < y < self.y_coordinate_max):
-            return
-
-        self.current_x = float(x) * self.x_scale
-        self.current_y = float(y) * self.y_scale
+        self.current_x = x * self.x_scale
+        self.current_y = y * self.y_scale
 
         self.path_points.append((self.current_x, self.current_y))
 
@@ -77,10 +77,8 @@ class PostscriptInstructions:
         x, y, *_ = line.split(" ")
         x = float(x) * self.x_scale
         y = float(y) * self.y_scale
-        if not (self.x_coordinate_min < x < self.x_coordinate_max):
-            return
-
-        if not (self.y_coordinate_min < y < self.y_coordinate_max):
+        if not (self.x_coordinate_min < x < self.x_coordinate_max) and not (
+                self.y_coordinate_min < y < self.y_coordinate_max):
             return
 
         self.canvas.line(self.current_x, self.current_y, x, y)
@@ -91,11 +89,10 @@ class PostscriptInstructions:
         x_coord, y_coord, width, height, *_ = line.split(" ")
         x_coord = float(x_coord) * self.x_scale
         y_coord = float(y_coord) * self.y_scale
-        if not (self.x_coordinate_min < x_coord < self.x_coordinate_max):
+        if not (self.x_coordinate_min < x_coord < self.x_coordinate_max) and not (
+                self.y_coordinate_min < y_coord < self.y_coordinate_max):
             return
 
-        if not (self.y_coordinate_min < y_coord< self.y_coordinate_max):
-            return
         width = float(width)
         height = float(height)
 
@@ -110,8 +107,10 @@ class PostscriptInstructions:
         x3 = float(x3) * self.x_scale
         y3 = float(y3) * self.y_scale
 
-        if (self.x_coordinate_min < x3 < self.x_coordinate_max) and (
-                self.y_coordinate_min < y3 < self.y_coordinate_max):
+        if (self.x_coordinate_min <= x1 <= self.x_coordinate_max and
+                self.y_coordinate_min <= y1 <= self.y_coordinate_max and
+                self.x_coordinate_min <= x3 <= self.x_coordinate_max and
+                self.y_coordinate_min <= y3 <= self.y_coordinate_max):
             x4 = 2 * x2 - x3
             y4 = 2 * y2 - y3
 
