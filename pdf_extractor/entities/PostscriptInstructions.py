@@ -10,10 +10,10 @@ class PostscriptInstructions:
         self.current_y = 0
         self.x_scale = 1
         self.y_scale = 1
-        self.x_coordinate_min = x_coordinate_min
-        self.x_coordinate_max = x_coordinate_max
-        self.y_coordinate_min = y_coordinate_min
-        self.y_coordinate_max = y_coordinate_max
+        self.x_coordinate_min = float(x_coordinate_min)
+        self.x_coordinate_max = float(x_coordinate_max)
+        self.y_coordinate_min = float(y_coordinate_min)
+        self.y_coordinate_max = float(y_coordinate_max)
 
     def parser_line(self, postscript_line_code):
         instruction = postscript_line_code.split(" ")
@@ -26,16 +26,16 @@ class PostscriptInstructions:
                 self._handle_stroke_color(postscript_line_code)
             case 'm':
                 self._handle_moveto(postscript_line_code)
-            case 'l':
-                self._handle_lineto(postscript_line_code)
+            # case 'l':
+            #     self._handle_lineto(postscript_line_code)
             case 're':
                 self._handle_rectangle(postscript_line_code)
             case 'c':
                 self._handle_curveto(postscript_line_code)
-            case 'w':
-                self._handle_setlinewidth(postscript_line_code)
-            case 'd':
-                self._handle_define_pattern(postscript_line_code)
+            # case 'w':
+            #     self._handle_setlinewidth(postscript_line_code)
+            # case 'd':
+            #     self._handle_define_pattern(postscript_line_code)
             case 'cm':
                 self._handle_scale(postscript_line_code)
             # case 'f*':  # Handle 'f*'
@@ -62,11 +62,11 @@ class PostscriptInstructions:
 
     def _handle_moveto(self, line):
         x, y, *_ = line.split(" ")
-        if not (self.x_coordinate_min < x < self.x_coordinate_max):
-            return
-
-        if not (self.y_coordinate_min < y < self.y_coordinate_max):
-            return
+        # if not (self.x_coordinate_min < x < self.x_coordinate_max):
+        #     return
+        #
+        # if not (self.y_coordinate_min < y < self.y_coordinate_max):
+        #     return
 
         self.current_x = float(x) * self.x_scale
         self.current_y = float(y) * self.y_scale
@@ -75,12 +75,10 @@ class PostscriptInstructions:
 
     def _handle_lineto(self, line):
         x, y, *_ = line.split(" ")
-        x = float(x) * self.x_scale
-        y = float(y) * self.y_scale
-        if not (self.x_coordinate_min < x < self.x_coordinate_max):
-            return
-
-        if not (self.y_coordinate_min < y < self.y_coordinate_max):
+        x = float(x)
+        y = float(y)
+        if not (self.x_coordinate_min < x < self.x_coordinate_max) or not (
+                self.y_coordinate_min < y < self.y_coordinate_max):
             return
 
         self.canvas.line(self.current_x, self.current_y, x, y)
@@ -91,11 +89,10 @@ class PostscriptInstructions:
         x_coord, y_coord, width, height, *_ = line.split(" ")
         x_coord = float(x_coord) * self.x_scale
         y_coord = float(y_coord) * self.y_scale
-        if not (self.x_coordinate_min < x_coord < self.x_coordinate_max):
+        print("x,y", x_coord, y_coord)
+        if y_coord < self.y_coordinate_min:
             return
 
-        if not (self.y_coordinate_min < y_coord< self.y_coordinate_max):
-            return
         width = float(width)
         height = float(height)
 
