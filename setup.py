@@ -10,5 +10,4 @@ positions = image.get_lithologies_limit()
 
 draw = Draw(pdf_file_path, y_coordinate_min=positions['profile_word_y'], y_coordinate_max=positions['lithology_word_y'])
 draw.complete_pdf(pdf_to_save_file)
-
 lithology_rect(pdf_to_save_file)

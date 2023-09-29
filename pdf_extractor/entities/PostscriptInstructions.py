@@ -74,9 +74,8 @@ class PostscriptInstructions:
         x = float(x)
         y = float(y)
 
-
-        self.current_x = float(x) * self.x_scale
-        self.current_y = float(y) * self.y_scale
+        self.current_x = x * self.x_scale
+        self.current_y = y * self.y_scale
 
         with open('teste.ps', 'a') as file:
             file.write(f"m {self.current_x} {self.current_y}" + "\n")
@@ -92,6 +91,7 @@ class PostscriptInstructions:
             return
 
         if y < self.y_coordinate_min:
+
             return
 
         with open('teste.ps', 'a') as file:
@@ -102,6 +102,7 @@ class PostscriptInstructions:
         self.current_y = y
 
     def _handle_rectangle(self, line):
+      
         x, y, width, height, *_ = line.split(" ")
         x = float(x) * self.x_scale
         y = float(y) * self.y_scale
@@ -128,8 +129,6 @@ class PostscriptInstructions:
         y2 = float(y2) * self.y_scale
         x3 = float(x3) * self.x_scale
         y3 = float(y3) * self.y_scale
-
-
         x4 = 2 * x2 - x3
         y4 = 2 * y2 - y3
 
