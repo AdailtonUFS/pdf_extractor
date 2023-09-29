@@ -12,5 +12,3 @@ draw = Draw(pdf_file_path, y_coordinate_min=positions['profile_word_y'], y_coord
 draw.complete_pdf(pdf_to_save_file)
 
 lithology_rect(pdf_to_save_file)
-
-# # /home/skywalker/projects/python/pdfquery/pdf_extractor/pdfs/3CP1853SE_PC.pdf
