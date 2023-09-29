@@ -1,9 +1,7 @@
 import os
-import time
 
 from pdf_extractor.entities.Draw import Draw
 from pdf_extractor.entities.Image import Image
-from pdf_extractor.entities.Marker import Marker
 from utils.uniquify_file import uniquify
 
 def define_pdf_path():
@@ -52,20 +50,4 @@ file.close()
 print(position)
 draw = Draw(pdf_file_path, y_coordinate_min=position['perf_y'], y_coordinate_max=position['y'])
 draw.complete_pdf(path_save)
-#
-time.sleep(1)
-marker = Marker(path_save)
 
-with open('teste.ps', "a+") as file:
-    file.seek(0)
-    lines = file.readlines()
-
-    if len(lines) > 0:
-        for line in lines:
-            instruction, x, y = line.split(" ")
-            x = float(x)
-            y = float(y)
-            if instruction == 'm':
-                marker.text_mark(path_save, 0, f"move em {x} {y}", x,y)
-            if instruction == 'l':
-                marker.text_mark(path_save, 0, f"linha em {x} {y}", x,y)
