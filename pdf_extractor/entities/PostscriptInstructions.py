@@ -28,10 +28,10 @@ class PostscriptInstructions:
                 self._handle_moveto(postscript_line_code)
             case 'l':
                 self._handle_lineto(postscript_line_code)
-            case 're':
-                self._handle_rectangle(postscript_line_code)
-            case 'c':
-                self._handle_curveto(postscript_line_code)
+            # case 're':
+            #     self._handle_rectangle(postscript_line_code)
+            # case 'c':
+            #     self._handle_curveto(postscript_line_code)
             case 'w':
                 self._handle_setlinewidth(postscript_line_code)
             case 'd':
@@ -53,23 +53,32 @@ class PostscriptInstructions:
     def _handle_fill_color(self, line):
         r, g, b, *_ = line.split(" ")
         color = Color(float(r), float(g), float(b))
+        colortest = color.bitmap_rgb()
+
+        # with open('teste.ps', 'a') as file:
+        #     file.write(f"{line} : mudei a cor do preenchimento para ({colortest[0]}, {colortest[1]}, {colortest[2]})"+ "\n")
+
         self.canvas.setFillColor(color)
 
     def _handle_stroke_color(self, line):
         r, g, b, *_ = line.split(" ")
         color = Color(float(r), float(g), float(b))
+        colortest = color.bitmap_rgb()
+        # with open('teste.ps', 'a') as file:
+        #     file.write(f"{line} : mudei a cor do preenchimento para ({colortest[0]}, {colortest[1]}, {colortest[2]})"+ "\n")
         self.canvas.setStrokeColor(color)
 
     def _handle_moveto(self, line):
         x, y, *_ = line.split(" ")
+
         x = float(x)
         y = float(y)
-        if not (self.x_coordinate_min < x < self.x_coordinate_max) and not (
-                self.y_coordinate_min < y < self.y_coordinate_max):
-            return
 
         self.current_x = x * self.x_scale
         self.current_y = y * self.y_scale
+
+        with open('teste.ps', 'a') as file:
+            file.write(f"m {self.current_x} {self.current_y}" + "\n")
 
         self.path_points.append((self.current_x, self.current_y))
 
@@ -77,26 +86,40 @@ class PostscriptInstructions:
         x, y, *_ = line.split(" ")
         x = float(x) * self.x_scale
         y = float(y) * self.y_scale
-        if not (self.x_coordinate_min < x < self.x_coordinate_max) and not (
-                self.y_coordinate_min < y < self.y_coordinate_max):
+
+        if y > self.y_coordinate_max:
             return
+
+        if y < self.y_coordinate_min:
+
+            return
+
+        with open('teste.ps', 'a') as file:
+            file.write(f"l {x} {y}" + "\n")
 
         self.canvas.line(self.current_x, self.current_y, x, y)
         self.current_x = x
         self.current_y = y
 
     def _handle_rectangle(self, line):
-        x_coord, y_coord, width, height, *_ = line.split(" ")
-        x_coord = float(x_coord) * self.x_scale
-        y_coord = float(y_coord) * self.y_scale
-        if not (self.x_coordinate_min < x_coord < self.x_coordinate_max) and not (
-                self.y_coordinate_min < y_coord < self.y_coordinate_max):
-            return
+      
+        x, y, width, height, *_ = line.split(" ")
+        x = float(x) * self.x_scale
+        y = float(y) * self.y_scale
 
         width = float(width)
         height = float(height)
 
-        self.canvas.rect(x_coord, y_coord, width, height, fill=True, stroke=False)
+        if y > self.y_coordinate_max:
+            return
+
+        if y < self.y_coordinate_min:
+            return
+
+        with open('teste.ps', 'a') as file:
+            file.write(f"{line} : fiz um retangulo em a posição ({x}, {y})" + "\n")
+
+        self.canvas.rect(x, y, width, height, fill=True, stroke=False)
 
     def _handle_curveto(self, line):
         x1, y1, x2, y2, x3, y3, *_ = line.split(" ")
@@ -106,17 +129,12 @@ class PostscriptInstructions:
         y2 = float(y2) * self.y_scale
         x3 = float(x3) * self.x_scale
         y3 = float(y3) * self.y_scale
+        x4 = 2 * x2 - x3
+        y4 = 2 * y2 - y3
 
-        if (self.x_coordinate_min <= x1 <= self.x_coordinate_max and
-                self.y_coordinate_min <= y1 <= self.y_coordinate_max and
-                self.x_coordinate_min <= x3 <= self.x_coordinate_max and
-                self.y_coordinate_min <= y3 <= self.y_coordinate_max):
-            x4 = 2 * x2 - x3
-            y4 = 2 * y2 - y3
-
-            self.canvas.bezier(x1, y1, x2, y2, x3, y3, x4, y4)
-            self.current_x = x3
-            self.current_y = y3
+        self.canvas.bezier(x1, y1, x2, y2, x3, y3, x4, y4)
+        self.current_x = x3
+        self.current_y = y3
 
     def _handle_setlinewidth(self, line):
         linewidth, *_ = line.split(" ")

@@ -3,10 +3,13 @@ import pytesseract
 from PyPDF2 import PdfReader
 from pytesseract import Output
 
+from utils.path import lithologies_file_location
+
 
 class Image:
     def __init__(self, pdf_path):
         reader = PdfReader(pdf_path)
+        self.pdf_path = pdf_path
         self.page = reader.pages[0]
 
         images = pdf2image.convert_from_path(pdf_path)
@@ -41,3 +44,40 @@ class Image:
             raise Exception("Ocorreu um erro ao buscar as palavras")
 
         return self._convert_pixels_to_pdf(word_position)
+
+    def get_lithologies_limit(self):
+        positions = {'lithology_word_x': 0, 'lithology_word_y': 0, 'profile_word_x': 0, 'profile_word_y': 0}
+
+        lithologies_file = lithologies_file_location()
+
+        with open(lithologies_file, "a+") as file:
+            file.seek(0)
+            lines = file.readlines()
+
+            if len(lines) > 0:
+                for line in lines:
+                    filename, lithology_word_x, lithology_word_y, profile_word_x, profile_word_y = line.strip().split(
+                        ';;')
+                    if filename == self.pdf_path:
+                        positions = {'lithology_word_x': float(lithology_word_x),
+                                     'lithology_word_y': float(lithology_word_y),
+                                     'profile_word_x': float(profile_word_x), 'profile_word_y': float(profile_word_y)}
+
+                        return positions
+
+            lithology_position = self.search_word("litologias:")
+            profile_position = self.search_word("perfis")
+            if lithology_position and profile_position:
+                positions = {'lithology_word_x': lithology_position['x'], 'lithology_word_y': lithology_position['y'],
+                             'profile_word_x': profile_position['x'],
+                             'profile_word_y': profile_position['y']}
+
+                file.write(self.pdf_path + ";;" + str(lithology_position['x']) + ";;" + str(
+                    lithology_position['y']) + ";;" + str(
+                    profile_position['x']) + ";;" + str(profile_position['y']) + "\n")
+
+                file.close()
+
+                return positions
+
+        return positions

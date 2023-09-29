@@ -45,9 +45,9 @@ class Draw:
     def process_pdf(self, pdf_path, instruction_func):
         pdf_path = self.validate_path(pdf_path)
         pdf_canvas = self.canvas(pdf_path)
-        parser = PostscriptInstructions(pdf_canvas, x_coordinate_min=self.x_coordinate_min, x_coordinate_max=self.x_coordinate_max, y_coordinate_min=self.y_coordinate_min,
+        parser = PostscriptInstructions(pdf_canvas, x_coordinate_min=self.x_coordinate_min,
+                                        x_coordinate_max=self.x_coordinate_max, y_coordinate_min=self.y_coordinate_min,
                                         y_coordinate_max=self.y_coordinate_max)
-
         num_lines = self.count_lines()
         progress_bar = tqdm(total=num_lines, desc='Progresso')
 
