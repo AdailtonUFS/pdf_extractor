@@ -16,14 +16,16 @@ class Image:
         self.image = images[0]
 
     def _all_words(self):
-        ocr_dict: dict = pytesseract.image_to_data(self.image, output_type=Output.DICT)
-        return ocr_dict
+        words: dict = pytesseract.image_to_data(self.image, output_type=Output.DICT)
+        return words
 
     def _convert_pixels_to_pdf(self, word_position):
         pixel_to_point_width_ratio = float(self.page.mediabox.width / self.image.width)
         pixel_to_point_height_ratio = float(self.page.mediabox.height / self.image.height)
+
         x_converted_coordinate = word_position['x'] * pixel_to_point_width_ratio
         y_converted_coordinate = float(self.page.mediabox.height) - (word_position['y'] * pixel_to_point_height_ratio)
+
         return {'x': x_converted_coordinate, 'y': y_converted_coordinate}
 
     def search_word(self, word: str):
@@ -31,6 +33,9 @@ class Image:
 
         word_position = {}
         i: int = 0
+
+        # @TODO Criar um algoritmo melhor de busca
+
         while i < len(words_collection['text']):
             if words_collection['text'][i].lower() == word:
                 word_position['word'] = words_collection['text'][i].lower()
@@ -40,6 +45,7 @@ class Image:
                 break
 
             i += 1
+
         if not word_position:
             raise Exception("Ocorreu um erro ao buscar as palavras")
 
@@ -48,9 +54,11 @@ class Image:
     def get_lithologies_limit(self):
         positions = {'lithology_word_x': 0, 'lithology_word_y': 0, 'profile_word_x': 0, 'profile_word_y': 0}
 
-        lithologies_file = lithologies_file_location()
+        lithologies_file_path = lithologies_file_location()
 
-        with open(lithologies_file, "a+") as file:
+        # @TODO Criar uma estrutura de dados melhor
+                
+        with open(lithologies_file_path, "a+") as file:
             file.seek(0)
             lines = file.readlines()
 

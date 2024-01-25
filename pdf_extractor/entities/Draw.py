@@ -4,7 +4,6 @@ from tqdm import tqdm
 
 from pdf_extractor.entities.PostscriptInstructions import PostscriptInstructions
 
-
 class Draw:
     def __init__(self, pdf_path, x_coordinate_min=0, x_coordinate_max=0, y_coordinate_min=0, y_coordinate_max=0):
         try:
@@ -75,6 +74,14 @@ class Draw:
         def process_instruction(parser, postscript_code_line):
             if 're' not in postscript_code_line:
                 parser.parser_line(postscript_code_line)
+
+        self.process_pdf(pdf_path, process_instruction)
+
+    def change_color(self, pdf_path):
+        def process_instruction(parser, postscript_code_line):
+            if 'RG' or "rg" in postscript_code_line:
+                parser.parser_line(postscript_code_line)
+                print(postscript_code_line)
 
         self.process_pdf(pdf_path, process_instruction)
 
