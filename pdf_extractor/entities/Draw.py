@@ -79,9 +79,9 @@ class Draw:
 
     def change_color(self, pdf_path):
         def process_instruction(parser, postscript_code_line):
-            if 'RG' or "rg" in postscript_code_line:
-                parser.parser_line(postscript_code_line)
+            if 'RG' in postscript_code_line or "rg" in postscript_code_line:
                 print(postscript_code_line)
+                parser.parser_line(postscript_code_line)
 
         self.process_pdf(pdf_path, process_instruction)
 
