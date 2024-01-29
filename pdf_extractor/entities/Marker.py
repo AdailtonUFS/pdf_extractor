@@ -19,6 +19,20 @@ class Marker:
         page_to_draw.merge_page(marker_pdf.pages[0])
         Marker.generate_marker_pdf(page_to_draw, output_file_pdf_path)
 
+    def multiple_text_mark(self, output_file_pdf_path: str, page_number: int, coordinates_x, coordinates_y):
+        packet = Marker.multiple_text_draw(coordinates_x, coordinates_y)
+        if packet is not None:
+            marker_pdf = PdfReader(packet)
+            if marker_pdf.pages:
+                page_to_draw = self.pdf.pages[page_number]
+                page_to_draw.merge_page(marker_pdf.pages[0])
+                Marker.generate_marker_pdf(page_to_draw, output_file_pdf_path)
+            else:
+                print("Erro: Nenhuma página válida no pacote.")
+        else:
+            print("Erro ao criar o pacote PDF.")
+
+
     def rectangle_mark(self, rect: Rect, color: Color, output_file_pdf_path: str, page_number: int):
         packet = Marker.rect_draw(rect, color)
         marker_pdf = PdfReader(packet)
@@ -31,6 +45,19 @@ class Marker:
         packet = io.BytesIO()
         can = canvas.Canvas(packet, pagesize=letter)
         can.drawString(coordinate_x, coordinate_y, text)
+        can.save()
+        packet.seek(0)
+
+        return packet
+
+    @staticmethod
+    def multiple_text_draw(coordinates_x, coordinates_y):
+        packet = io.BytesIO()
+        can = canvas.Canvas(packet, pagesize=letter)
+
+        for x, y in zip(coordinates_x, coordinates_y):
+            can.drawString(x, y, "teste")
+
         can.save()
         packet.seek(0)
 
