@@ -28,10 +28,10 @@ class PostscriptInstructions:
                 self._handle_moveto(postscript_line_code)
             case 'l':
                 self._handle_lineto(postscript_line_code)
-            # case 're':
-            #     self._handle_rectangle(postscript_line_code)
-            # case 'c':
-            #     self._handle_curveto(postscript_line_code)
+            case 're':
+                self._handle_rectangle(postscript_line_code)
+            case 'c':
+                self._handle_curveto(postscript_line_code)
             case 'w':
                 self._handle_setlinewidth(postscript_line_code)
             case 'd':
